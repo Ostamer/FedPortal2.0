@@ -139,7 +139,10 @@ class BaseFormatter:
         """Применить маппинг к полям."""
         for field, mapping in self.MAP_FIELDS.items():
             if field in data and data[field] is not None:
-                data[field] = mapping[data[field]]
+                if isinstance(data[field], list):
+                    data[field] = [mapping[item] for item in data[field] if item in mapping]
+                else:
+                    data[field] = mapping[data[field]]
 
     def _convert_bool_fields(self, data: Dict[str, Any]) -> None:
         """Привести булевы поля к bool."""

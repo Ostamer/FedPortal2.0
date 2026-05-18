@@ -137,7 +137,7 @@ class DepartmentPayload(BaseModel):
     okato: Optional[str]
     oktmo: Optional[str]
     kids_count: int
-    location_type: int
+    location_type: str
     is_deleted: bool
 
     @field_validator('location_type')
@@ -157,7 +157,7 @@ class OrderPayload(BaseModel):
     id: int
     partner_id: int
     program_id: int
-    state: int
+    state: str
     birthday: Optional[str]
     user_id: int
     child_id: int
@@ -195,22 +195,24 @@ class ActivityPayload(BaseModel):
     guid: str
     name: str
     announce: Optional[str]
-    persons: Optional[str] = None
+    persons: Optional[list] = None
     length: Optional[float] = None
-    length_unit: int
+    length_unit: str
     partner_guid: str
-    state: int
+    state: str
     disabled_access: bool
     location: Optional[str]
-    education_form: int
-    level: int
+    education_form: str
+    level: str
     date_created: str
-    section: int
-    significant_project: int
+    section: str
+    significant_project: str
 
     @field_validator('persons')
     @classmethod
     def _validate_persons(cls, v: Optional[list]) -> Optional[list]:
+        if v is None:
+            return v
         for i in v:
             if i is not None and i not in ACTIVITY_PERSONS_MAP:
                 raise ValueError(f'invalid persons: {v}')
@@ -270,26 +272,26 @@ class EventPayload(BaseModel):
     partner_guid: str
     municipality_id: int
     name: str
-    state: int
+    state: str
     age_from: float
     age_to: float
     rate: float
     location: Optional[str]
-    program_type: int
-    section_id: int
+    program_type: str
+    section_id: str
     announce: Optional[str]
     description: Optional[str]
     date_created: str
     duration: float
-    duration_unit: int
+    duration_unit: str
     min_persons: int
     max_persons: int
-    levels: int
-    education_form: int
+    levels: str
+    education_form: str
     certificate_required: bool
     param1: bool
     param2: bool
-    adaptive_type: int
+    adaptive_type: str
 
     @field_validator('state')
     @classmethod
@@ -390,7 +392,7 @@ class ProgramGroupFinancingSourcePayload(BaseModel):
 
     id: int
     group_guid: str
-    financing_source: int
+    financing_source: str
     financing_cost: float
 
     @field_validator('financing_source')
