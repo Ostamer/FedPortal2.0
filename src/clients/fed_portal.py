@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Клиент для взаимодействия с Федеральным порталом.
 """
@@ -120,6 +119,3 @@ class ExternalApiClient:
             success=result.get('success', False),
         )
         return result
-
-
-

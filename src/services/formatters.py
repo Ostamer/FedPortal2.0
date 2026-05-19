@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Форматировщики данных для различных сущностей.
 
@@ -6,23 +5,33 @@
 - валидацию входных данных через Pydantic-модели (validate)
 - преобразование в формат внешнего API (format)
 """
-from typing import Any, Dict, List, Type
+
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from pydantic import BaseModel, ValidationError
 
 from src.config.logging import get_logger
-from src.schemas.payloads import (
-    ActivityPayload,
-    CertificatePayload,
-    OrderPayload,
-    DepartmentPayload,
-    EventPayload,
-    ParentsPayload,
-    ProgramGroupFinancingSourcePayload,
-    ProgramGroupPayload,
-    OrganizationPayload,
+from src.mappings.activity import (
+    ACTIVITY_EDUCATION_FORM_MAP,
+    ACTIVITY_LEVEL_MAP,
+    ACTIVITY_LENGTH_UNIT_MAP,
+    ACTIVITY_PERSONS_MAP,
+    ACTIVITY_SECTION_MAP,
+    ACTIVITY_SIGNIFICANT_PROJECT_MAP,
+    ACTIVITY_STATE_MAP,
 )
-
+from src.mappings.certificate import CERTIFICATE_STATE_MAP
+from src.mappings.department import DEPARTMENT_LOCATION_TYPE_MAP
+from src.mappings.event import (
+    EVENT_ADAPTIVE_TYPE_MAP,
+    EVENT_DURATION_UNIT_MAP,
+    EVENT_EDUCATION_FORM_MAP,
+    EVENT_LEVELS_MAP,
+    EVENT_PROGRAM_TYPE_MAP,
+    EVENT_SECTION_ID_MAP,
+    EVENT_STATE_MAP,
+)
+from src.mappings.order import ORDER_STATE_MAP
 from src.mappings.organization import (
     ORGANIZATION_ACCREDITATION_CATEGORY_MAP,
     ORGANIZATION_ACCOUNTING_TYPE_MAP,
@@ -31,37 +40,19 @@ from src.mappings.organization import (
     ORGANIZATION_SUBORDINATION_MAP,
     ORGANIZATION_TYPE_MAP,
 )
-
-from src.mappings.department import DEPARTMENT_LOCATION_TYPE_MAP
-
-from src.mappings.order import ORDER_STATE_MAP
-
-from src.mappings.activity import (
-    ACTIVITY_STATE_MAP,
-    ACTIVITY_EDUCATION_FORM_MAP,
-    ACTIVITY_LEVEL_MAP,
-    ACTIVITY_PERSONS_MAP,
-    ACTIVITY_SECTION_MAP,
-    ACTIVITY_LENGTH_UNIT_MAP,
-    ACTIVITY_SIGNIFICANT_PROJECT_MAP,
-)
-
-from src.mappings.event import (
-    EVENT_STATE_MAP,
-    EVENT_LEVELS_MAP,
-    EVENT_PROGRAM_TYPE_MAP,
-    EVENT_ADAPTIVE_TYPE_MAP,
-    EVENT_SECTION_ID_MAP,
-    EVENT_DURATION_UNIT_MAP,
-    EVENT_EDUCATION_FORM_MAP,
-)
-
-from src.mappings.certificate import (
-    CERTIFICATE_STATE_MAP
-)
-
 from src.mappings.program_group_financing_source import (
-    PROGRAM_GROUP_FINANCING_SOURCE_MAP
+    PROGRAM_GROUP_FINANCING_SOURCE_MAP,
+)
+from src.schemas.payloads import (
+    ActivityPayload,
+    CertificatePayload,
+    DepartmentPayload,
+    EventPayload,
+    OrderPayload,
+    OrganizationPayload,
+    ParentsPayload,
+    ProgramGroupFinancingSourcePayload,
+    ProgramGroupPayload,
 )
 
 logger = get_logger(__name__)
@@ -77,25 +68,32 @@ class BaseFormatter:
     MAP_FIELDS: Dict[str, Dict[str, Any]] = {}
     PAYLOAD_MODEL: Type[BaseModel] | None = None
 
-    def validate(self, data: Dict[str, Any]) -> bool:
-        """Проверить данные через Pydantic-модель или fallback на ручную проверку."""
+    def validate(
+        self, data: Dict[str, Any]
+    ) -> Tuple[bool, Optional[List[Dict[str, Any]]]]:
+        """Проверить данные через Pydantic-модель или fallback на ручную проверку.
+
+        Returns:
+            Кортеж (is_valid, errors). При успехе errors=None.
+        """
         if not isinstance(data, dict):
             logger.warning(
                 f"{self._get_log_name()}_validation_failed",
                 reason="not_a_dict",
             )
-            return False
+            return False, [{"field": "<root>", "reason": "not_a_dict"}]
 
         if self.PAYLOAD_MODEL is not None:
             try:
                 self.PAYLOAD_MODEL.model_validate(data)
-                return True
+                return True, None
             except ValidationError as exc:
+                errors = exc.errors(include_url=False)
                 logger.warning(
                     f"{self._get_log_name()}_validation_failed",
-                    errors=exc.errors(include_url=False),
+                    errors=errors,
                 )
-                return False
+                return False, errors
 
         # Fallback ручная проверка (для обратной совместимости)
         for field in self.REQUIRED_FIELDS:
@@ -105,7 +103,7 @@ class BaseFormatter:
                     field=field,
                     reason="missing",
                 )
-                return False
+                return False, [{"field": field, "reason": "missing"}]
 
         for field, mapping in self.MAP_FIELDS.items():
             if field in data and data[field] is not None:
@@ -116,9 +114,15 @@ class BaseFormatter:
                         value=data[field],
                         reason="invalid_value",
                     )
-                    return False
+                    return False, [
+                        {
+                            "field": field,
+                            "reason": "invalid_value",
+                            "value": data[field],
+                        }
+                    ]
 
-        return True
+        return True, None
 
     def format(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Преобразовать данные для отправки во внешнее API."""
@@ -140,7 +144,9 @@ class BaseFormatter:
         for field, mapping in self.MAP_FIELDS.items():
             if field in data and data[field] is not None:
                 if isinstance(data[field], list):
-                    data[field] = [mapping[item] for item in data[field] if item in mapping]
+                    data[field] = [
+                        mapping[item] for item in data[field] if item in mapping
+                    ]
                 else:
                     data[field] = mapping[data[field]]
 
@@ -180,7 +186,6 @@ class OrganizationFormatter(BaseFormatter):
     """Форматировщик для организаций."""
 
     PAYLOAD_MODEL = OrganizationPayload
-
     MAP_FIELDS = {
         "status": ORGANIZATION_STATUS_MAP,
         "legal_form": ORGANIZATION_LEGAL_FORM_MAP,
@@ -195,7 +200,6 @@ class DepartmentFormatter(BaseFormatter):
     """Форматировщик для муниципалитетов (municipality)."""
 
     PAYLOAD_MODEL = DepartmentPayload
-
     MAP_FIELDS = {"location_type": DEPARTMENT_LOCATION_TYPE_MAP}
 
 
@@ -203,7 +207,6 @@ class OrderFormatter(BaseFormatter):
     """Форматировщик для заявок (declaration)."""
 
     PAYLOAD_MODEL = OrderPayload
-
     MAP_FIELDS = {"state": ORDER_STATE_MAP}
 
 
@@ -211,7 +214,6 @@ class ActivityFormatter(BaseFormatter):
     """Форматировщик для мероприятий (activity)."""
 
     PAYLOAD_MODEL = ActivityPayload
-
     MAP_FIELDS = {
         "state": ACTIVITY_STATE_MAP,
         "education_form": ACTIVITY_EDUCATION_FORM_MAP,
@@ -227,7 +229,6 @@ class EventFormatter(BaseFormatter):
     """Форматировщик для программ (event)."""
 
     PAYLOAD_MODEL = EventPayload
-
     MAP_FIELDS = {
         "state": EVENT_STATE_MAP,
         "levels": EVENT_LEVELS_MAP,
@@ -243,7 +244,6 @@ class ProgramGroupFormatter(BaseFormatter):
     """Форматировщик для групп программ (program-group)."""
 
     PAYLOAD_MODEL = ProgramGroupPayload
-
     MAP_FIELDS = {}
 
 
@@ -251,15 +251,13 @@ class CertificateFormatter(BaseFormatter):
     """Форматировщик для сертификатов (certificate)."""
 
     PAYLOAD_MODEL = CertificatePayload
-
     MAP_FIELDS = {"state": CERTIFICATE_STATE_MAP}
 
 
 class ProgramGroupFinancingSourceFormatter(BaseFormatter):
-    """Форматировщик для источников финансирования групп (program-group-financing-source)."""
+    """Форматировщик для источников финансирования групп."""
 
     PAYLOAD_MODEL = ProgramGroupFinancingSourcePayload
-
     MAP_FIELDS = {"financing_source": PROGRAM_GROUP_FINANCING_SOURCE_MAP}
 
 
@@ -267,6 +265,4 @@ class ParentsFormatter(BaseFormatter):
     """Форматировщик для родителей (parents)."""
 
     PAYLOAD_MODEL = ParentsPayload
-
     MAP_FIELDS = {}
-

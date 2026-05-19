@@ -1,12 +1,13 @@
-# coding: utf-8
 """
 Публикация сообщений в Dead Letter Queues.
 """
+
 import json
 from datetime import datetime, timezone
 from typing import Optional
 
 import aio_pika
+
 from src.config.logging import get_logger
 
 logger = get_logger(__name__)

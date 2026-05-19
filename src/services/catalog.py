@@ -1,5 +1,5 @@
-# coding: utf-8
 """Реестр связей: тип сущности → endpoint, сервис, форматировщик."""
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -35,11 +35,7 @@ def _build_registry() -> Dict[str, EntityDefinition]:
         ProgramGroupFinancingSourceFormatter,
         ProgramGroupFormatter,
     )
-    from src.services.sync_services import (
-        ActivitySyncService,
-        ClassicSyncService,
-        EventSyncService,
-    )
+    from src.services.sync_services import ActivitySyncService, ClassicSyncService, EventSyncService
 
     entries = [
         _entry(EntityType.ORGANIZATION, 'organization', ClassicSyncService, OrganizationFormatter),

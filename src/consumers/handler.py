@@ -1,8 +1,8 @@
-# coding: utf-8
 """
 Оркестратор обработки одного сообщения из RabbitMQ.
 Парсинг → вызов сервиса → запись результата → ack / DLQ.
 """
+
 import json
 from typing import Optional
 
@@ -33,7 +33,6 @@ class MessageHandler:
 
     async def handle(self, message: aio_pika.IncomingMessage) -> None:
         async with message.process(ignore_processed=True):
-            # Получаем тело сообщения
             body = message.body
 
             parsed = await self._parse(body)
@@ -75,7 +74,12 @@ class MessageHandler:
                         service_coro=lambda: self._dispatch(service, msg),
                     )
                 except (ValueError, TypeError, ValidationError) as exc:
-                    logger.warning('sync_fatal_exception', error=str(exc), entity=msg.entity_type, action=msg.action)
+                    logger.warning(
+                        'sync_fatal_exception',
+                        error=str(exc),
+                        entity=msg.entity_type,
+                        action=msg.action,
+                    )
                     await self._dlq.publish(
                         settings.dlq_fatal,
                         body,
@@ -85,7 +89,12 @@ class MessageHandler:
                     await message.ack()
                     return
                 except (httpx.TimeoutException, httpx.RequestError) as exc:
-                    logger.error('sync_retry_exception', error=str(exc), entity=msg.entity_type, action=msg.action)
+                    logger.error(
+                        'sync_retry_exception',
+                        error=str(exc),
+                        entity=msg.entity_type,
+                        action=msg.action,
+                    )
                     await self._dlq.publish(
                         settings.dlq_retry,
                         body,
@@ -95,7 +104,12 @@ class MessageHandler:
                     await message.ack()
                     return
                 except Exception as exc:
-                    logger.error('sync_retry_exception', error=str(exc), entity=msg.entity_type, action=msg.action)
+                    logger.error(
+                        'sync_retry_exception',
+                        error=str(exc),
+                        entity=msg.entity_type,
+                        action=msg.action,
+                    )
                     await self._dlq.publish(
                         settings.dlq_retry,
                         body,
@@ -107,7 +121,9 @@ class MessageHandler:
 
                 await self._route_by_status(message, msg, result, body)
 
-    async def _parse(self, body: bytes) -> Optional[tuple[dict, RabbitMessage]]:
+    async def _parse(
+        self, body: bytes
+    ) -> Optional[tuple[dict, RabbitMessage]]:
         """Распарсить тело сообщения. При ошибке — отправить в fatal DLQ."""
         try:
             data = json.loads(body.decode())
@@ -167,7 +183,11 @@ class MessageHandler:
                 http_status_code=status,
             )
             await message.ack()
-            logger.warning('message_moved_to_dlq_fatal', object_id=msg.object_id, status=status)
+            logger.warning(
+                'message_moved_to_dlq_fatal',
+                object_id=msg.object_id,
+                status=status,
+            )
         elif httpx.codes.is_server_error(status):
             await self._dlq.publish(
                 settings.dlq_retry,
@@ -177,7 +197,11 @@ class MessageHandler:
                 http_status_code=status,
             )
             await message.ack()
-            logger.warning('message_moved_to_dlq_retry', object_id=msg.object_id, status=status)
+            logger.warning(
+                'message_moved_to_dlq_retry',
+                object_id=msg.object_id,
+                status=status,
+            )
         else:
             await self._dlq.publish(
                 settings.dlq_retry,
@@ -193,4 +217,3 @@ class MessageHandler:
                 status=status,
                 reason='unexpected_status',
             )
-

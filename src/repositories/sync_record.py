@@ -1,8 +1,8 @@
-# coding: utf-8
 """
 Репозиторий для SyncedRecord и SyncLog.
 Вся работа с БД, связанная с синхронизацией, сосредоточена здесь.
 """
+
 from datetime import datetime, timezone
 
 from sqlalchemy import select
@@ -65,6 +65,7 @@ class SyncRecordRepository:
             logger.debug('synced_record_deleted', entity_type=entity_type, object_id=object_id)
 
     async def _get_record(self, entity_type: EntityType, object_id: int) -> SyncedRecord | None:
+        """Получение записи об объекте на основе его id и типа сущности."""
         stmt = select(SyncedRecord).where(
             SyncedRecord.entity_type == entity_type,
             SyncedRecord.object_id == object_id,

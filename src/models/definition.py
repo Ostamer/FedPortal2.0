@@ -1,4 +1,3 @@
-# coding: utf-8
 """Описание конфигурации одной сущности в реестре интеграции."""
 from __future__ import annotations
 

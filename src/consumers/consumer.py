@@ -1,13 +1,13 @@
-# coding: utf-8
 """
 RabbitMQ консьюмер.
 Отвечает только за управление соединением и жизненным циклом.
 """
+
 from typing import Optional
 
 import aio_pika
-from src.config.logging import get_logger
 
+from src.config.logging import get_logger
 from src.clients.fed_portal import ExternalApiClient
 from src.config.main import settings
 from src.consumers.dlq import DLQPublisher
@@ -61,7 +61,7 @@ class MessageConsumer:
         logger.info("consumer_stopped")
 
     async def _declare_queues(self) -> None:
-        """Объявить основную очередь, DLQ retry, DLQ fatal ."""
+        """Объявить основную очередь, DLQ retry, DLQ fatal."""
         self._queue = await self._channel.declare_queue(
             settings.queue_sync,
             durable=True,
@@ -74,6 +74,3 @@ class MessageConsumer:
             fatal=settings.dlq_fatal,
             retry=settings.dlq_retry,
         )
-
-
-

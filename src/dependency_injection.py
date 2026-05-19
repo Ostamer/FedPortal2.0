@@ -1,7 +1,7 @@
-# coding: utf-8
 """
 FastAPI-зависимости для роутеров.
 """
+
 from collections.abc import AsyncGenerator
 from typing import Annotated
 

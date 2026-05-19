@@ -1,8 +1,7 @@
-# coding: utf-8
 from fastapi import APIRouter, Body, Depends, HTTPException
 
 from src.config.logging import get_logger
-from src.dependency_injection import DbSessionDep, get_orchestrator, get_service
+from src.dependency_injection import get_orchestrator, get_service
 from src.models.enum import EntityType
 from src.schemas.base import SyncResponse
 from src.services.orchestrator import SyncOrchestrator

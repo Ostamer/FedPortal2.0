@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import DateTime, Enum, Index, UniqueConstraint
-
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.models.base import Base
@@ -14,11 +13,13 @@ class SyncedRecord(Base):
 
     __tablename__ = 'synced_records'
     __table_args__ = (
-        UniqueConstraint('entity_type', 'object_id', name='uq_synced_records_entity_type_object_id'),
+        UniqueConstraint(
+            'entity_type', 'object_id',
+            name='uq_synced_records_entity_type_object_id',
+        ),
         Index('ix_synced_records_entity_type', 'entity_type'),
         Index('ix_synced_records_last_sync_time', 'last_sync_time'),
     )
-
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     object_id: Mapped[int]
@@ -31,5 +32,5 @@ class SyncedRecord(Base):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<SyncedRecord(entity={self.entity_type.value}, object_id={self.object_id})>'

@@ -1,8 +1,8 @@
-# coding: utf-8
 """
 Оркестратор синхронизации: общая логика для REST и RabbitMQ.
 Централизует: логирование, вызов сервиса, обновление реестра, commit.
 """
+
 from typing import Any, Awaitable, Callable, Dict, Optional
 
 from src.config.logging import get_logger
@@ -97,7 +97,8 @@ class SyncOrchestrator:
             await self._repo.delete(entity_type, object_id)
         elif object_id is not None:
             await self._repo.upsert(entity_type, object_id)
-        elif payload is not None and isinstance(payload, dict) and payload.get('id') is not None:
+        elif (payload is not None and isinstance(payload, dict)
+              and payload.get('id') is not None):
             await self._repo.upsert(entity_type, payload['id'])
 
     async def log_error(

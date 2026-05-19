@@ -5,7 +5,6 @@ from sqlalchemy import DateTime, Index
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-
 from src.models.base import Base
 
 
@@ -24,6 +23,5 @@ class SyncLog(Base):
     request_data: Mapped[dict] = mapped_column(JSONB)
     response_data: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
 
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<SyncLog(id={self.id}, created_at={self.created_at})>"

@@ -1,4 +1,3 @@
-# coding: utf-8
 """Типы сущностей синхронизации (значения совпадают с enum в PostgreSQL)."""
 import enum
 

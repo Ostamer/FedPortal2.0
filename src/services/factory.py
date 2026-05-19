@@ -1,5 +1,5 @@
-# coding: utf-8
 """Фабрики сервисов и форматировщиков по типу сущности."""
+
 from src.clients.fed_portal import ExternalApiClient
 from src.config.logging import get_logger
 from src.services.catalog import get_registry, resolve_entity_type

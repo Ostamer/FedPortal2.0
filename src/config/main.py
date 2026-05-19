@@ -1,9 +1,10 @@
-# coding: utf-8
 """
 Конфигурация микросервиса.
 """
-from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from typing import Optional
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -31,9 +32,11 @@ class Settings(BaseSettings):
     # Наименование очередей RabbitMQ
     # Основная очередь для входящих записей синхронизации
     queue_sync: str = ""
-    # Dead Letter Queue для сообщений, которые не удалось обработать и необходимо обработать вручную (4xx ошибки)
+    # Dead Letter Queue для сообщений,
+    # которые не удалось обработать и необходимо обработать вручную (4xx ошибки)
     dlq_fatal: str = ""
-    # Dead Letter Queue для сообщений, которые не удалось обработать и сообщение нужно отправить повторно (5xx ошибки)
+    # Dead Letter Queue для сообщений,
+    # которые не удалось обработать и сообщение нужно отправить повторно (5xx ошибки)
     dlq_retry: str = ""
 
     # Настройки базы данных PostgreSQL

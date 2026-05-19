@@ -1,15 +1,36 @@
-# coding: utf-8
 """
 Pydantic-модели payload'ов для валидации данных перед отправкой во внешнее API.
 
 Каждая модель отражает контракт конкретной сущности и даёт детальные
 ValidationError вместо грубой ручной проверки.
 """
+
 import re
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from src.mappings.activity import (
+    ACTIVITY_EDUCATION_FORM_MAP,
+    ACTIVITY_LEVEL_MAP,
+    ACTIVITY_LENGTH_UNIT_MAP,
+    ACTIVITY_PERSONS_MAP,
+    ACTIVITY_SECTION_MAP,
+    ACTIVITY_SIGNIFICANT_PROJECT_MAP,
+    ACTIVITY_STATE_MAP,
+)
+from src.mappings.certificate import CERTIFICATE_STATE_MAP
+from src.mappings.department import DEPARTMENT_LOCATION_TYPE_MAP
+from src.mappings.event import (
+    EVENT_ADAPTIVE_TYPE_MAP,
+    EVENT_DURATION_UNIT_MAP,
+    EVENT_EDUCATION_FORM_MAP,
+    EVENT_LEVELS_MAP,
+    EVENT_PROGRAM_TYPE_MAP,
+    EVENT_SECTION_ID_MAP,
+    EVENT_STATE_MAP,
+)
+from src.mappings.order import ORDER_STATE_MAP
 from src.mappings.organization import (
     ORGANIZATION_ACCREDITATION_CATEGORY_MAP,
     ORGANIZATION_ACCOUNTING_TYPE_MAP,
@@ -18,33 +39,11 @@ from src.mappings.organization import (
     ORGANIZATION_SUBORDINATION_MAP,
     ORGANIZATION_TYPE_MAP,
 )
-
-from src.mappings.department import DEPARTMENT_LOCATION_TYPE_MAP
-
-from src.mappings.order import ORDER_STATE_MAP
-
-from src.mappings.activity import (
-    ACTIVITY_STATE_MAP,
-    ACTIVITY_EDUCATION_FORM_MAP,
-    ACTIVITY_LEVEL_MAP,
-    ACTIVITY_PERSONS_MAP,
-    ACTIVITY_SECTION_MAP,
-    ACTIVITY_LENGTH_UNIT_MAP,
-    ACTIVITY_SIGNIFICANT_PROJECT_MAP,
+from src.mappings.program_group_financing_source import (
+    PROGRAM_GROUP_FINANCING_SOURCE_MAP,
 )
 
-from src.mappings.event import (
-    EVENT_ADAPTIVE_TYPE_MAP,
-    EVENT_STATE_MAP,
-    EVENT_LEVELS_MAP,
-    EVENT_SECTION_ID_MAP,
-    EVENT_PROGRAM_TYPE_MAP,
-    EVENT_DURATION_UNIT_MAP,
-    EVENT_EDUCATION_FORM_MAP,
-)
 
-from src.mappings.certificate import CERTIFICATE_STATE_MAP
-from src.mappings.program_group_financing_source import PROGRAM_GROUP_FINANCING_SOURCE_MAP
 class OrganizationPayload(BaseModel):
     """Модель организации (unit / organization)."""
 
@@ -148,7 +147,6 @@ class DepartmentPayload(BaseModel):
         return v
 
 
-
 class OrderPayload(BaseModel):
     """Модель заявки (declaration)."""
 
@@ -175,7 +173,9 @@ class OrderPayload(BaseModel):
     @field_validator('date_created', 'date_study', 'date_cancel')
     @classmethod
     def _validate_datetime(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None and v != '' and not re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$', str(v)):
+        if v is not None and v != '' and not re.match(
+            r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$', str(v)
+        ):
             raise ValueError('invalid datetime format, expected YYYY-MM-DD HH:MM:SS')
         return v
 
@@ -185,6 +185,7 @@ class OrderPayload(BaseModel):
         if v is not None and v not in ORDER_STATE_MAP:
             raise ValueError(f'invalid state: {v}')
         return v
+
 
 class ActivityPayload(BaseModel):
     """Модель мероприятия."""
@@ -342,6 +343,7 @@ class EventPayload(BaseModel):
             raise ValueError(f'invalid adaptive_type: {v}')
         return v
 
+
 class ProgramGroupPayload(BaseModel):
     """Модель группы программ (program-group)."""
 
@@ -385,6 +387,7 @@ class CertificatePayload(BaseModel):
             raise ValueError(f'invalid state: {v}')
         return v
 
+
 class ProgramGroupFinancingSourcePayload(BaseModel):
     """Модель источника финансирования группы (program-group-financing-source)."""
 
@@ -401,6 +404,7 @@ class ProgramGroupFinancingSourcePayload(BaseModel):
         if v is not None and v not in PROGRAM_GROUP_FINANCING_SOURCE_MAP:
             raise ValueError(f'invalid financing_source: {v}')
         return v
+
 
 class ParentsPayload(BaseModel):
     """Модель родителей (parents)."""
