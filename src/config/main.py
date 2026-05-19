@@ -44,6 +44,7 @@ class Settings(BaseSettings):
 
     # Retry / DLQ
     retry_delay_seconds: int = 60
+    retry_max_attempts: int = 3
 
     # Logging
     log_level: str = "INFO"

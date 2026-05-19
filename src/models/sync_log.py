@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.models.base import Base
+from src.models.enum import SyncSource
 
 
 class SyncLog(Base):
@@ -22,6 +23,7 @@ class SyncLog(Base):
     )
     request_data: Mapped[dict] = mapped_column(JSONB)
     response_data: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    source: Mapped[SyncSource] = mapped_column(default=SyncSource.MANUAL)
 
     def __repr__(self) -> str:
         return f"<SyncLog(id={self.id}, created_at={self.created_at})>"

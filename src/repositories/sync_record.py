@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.logging import get_logger
-from src.models.enum import EntityType
+from src.models.enum import EntityType, SyncSource
 from src.models.sync_log import SyncLog
 from src.models.synced_record import SyncedRecord
 
@@ -22,9 +22,9 @@ class SyncRecordRepository:
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def create_log(self, request_data: dict) -> SyncLog:
+    async def create_log(self, request_data: dict, source: SyncSource) -> SyncLog:
         """Создать запись лога перед вызовом сервиса."""
-        log = SyncLog(request_data=request_data, response_data=None)
+        log = SyncLog(request_data=request_data, response_data=None, source=source)
         self._session.add(log)
         await self._session.flush()
         await self._session.refresh(log)

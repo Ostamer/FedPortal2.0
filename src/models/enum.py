@@ -12,3 +12,9 @@ class EntityType(str, enum.Enum):
     CERTIFICATE = 'certificate'
     PROGRAM_GROUP_FINANCING_SOURCE = 'program-group-financing-source'
     PARENTS = 'parents'
+
+
+class SyncSource(str, enum.Enum):
+    MAIN_QUEUE = 'main_queue'
+    DLQ_RETRY = 'dlq_retry'
+    MANUAL = 'manual'

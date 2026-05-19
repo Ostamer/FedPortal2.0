@@ -15,7 +15,7 @@ from src.config.logging import get_logger
 from src.config.main import settings
 from src.consumers.dlq import DLQPublisher
 from src.models.base import async_session
-from src.models.enum import EntityType
+from src.models.enum import EntityType, SyncSource
 from src.repositories.sync_record import SyncRecordRepository
 from src.schemas.base import RabbitMessage, SyncResponse
 from src.services.orchestrator import SyncOrchestrator
@@ -34,6 +34,9 @@ class MessageHandler:
     async def handle(self, message: aio_pika.IncomingMessage) -> None:
         async with message.process(ignore_processed=True):
             body = message.body
+            headers = message.headers or {}
+            retry_attempt = int(headers.get('x-retry-attempt', 0))
+            source = SyncSource.DLQ_RETRY if retry_attempt > 0 else SyncSource.MAIN_QUEUE
 
             parsed = await self._parse(body)
             if parsed is None:
@@ -56,6 +59,7 @@ class MessageHandler:
                     body,
                     reason='unknown_action',
                     error=f'Unknown action: {msg.action}',
+                    attempt=retry_attempt,
                 )
                 await message.ack()
                 return
@@ -72,6 +76,7 @@ class MessageHandler:
                         object_id=msg.object_id,
                         payload=msg.payload,
                         service_coro=lambda: self._dispatch(service, msg),
+                        source=source,
                     )
                 except (ValueError, TypeError, ValidationError) as exc:
                     logger.warning(
@@ -85,6 +90,7 @@ class MessageHandler:
                         body,
                         reason='fatal_exception',
                         error=str(exc),
+                        attempt=retry_attempt,
                     )
                     await message.ack()
                     return
@@ -100,6 +106,7 @@ class MessageHandler:
                         body,
                         reason='transient_exception',
                         error=str(exc),
+                        attempt=retry_attempt + 1,
                     )
                     await message.ack()
                     return
@@ -115,11 +122,12 @@ class MessageHandler:
                         body,
                         reason='unexpected_exception',
                         error=str(exc),
+                        attempt=retry_attempt + 1,
                     )
                     await message.ack()
                     return
 
-                await self._route_by_status(message, msg, result, body)
+                await self._route_by_status(message, msg, result, body, retry_attempt)
 
     async def _parse(
         self, body: bytes
@@ -167,6 +175,7 @@ class MessageHandler:
         msg: RabbitMessage,
         result: SyncResponse,
         body: bytes,
+        retry_attempt: int,
     ) -> None:
         """Решить — ack или DLQ — на основе HTTP-статуса результата."""
         status = result.http_status_code
@@ -181,6 +190,7 @@ class MessageHandler:
                 reason='client_error',
                 error=result.message,
                 http_status_code=status,
+                attempt=retry_attempt,
             )
             await message.ack()
             logger.warning(
@@ -195,6 +205,7 @@ class MessageHandler:
                 reason='server_error',
                 error=result.message,
                 http_status_code=status,
+                attempt=retry_attempt + 1,
             )
             await message.ack()
             logger.warning(
@@ -209,6 +220,7 @@ class MessageHandler:
                 reason='unexpected_status',
                 error=result.message,
                 http_status_code=status,
+                attempt=retry_attempt + 1,
             )
             await message.ack()
             logger.warning(

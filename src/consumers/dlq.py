@@ -26,6 +26,7 @@ class DLQPublisher:
         reason: str,
         error: Optional[str] = None,
         http_status_code: Optional[int] = None,
+        attempt: int = 1,
     ) -> None:
         """
         Сформировать сообщение и опубликовать в указанную DLQ.
@@ -36,6 +37,7 @@ class DLQPublisher:
             reason: причина попадания в DLQ.
             error: текст ошибки.
             http_status_code: HTTP-статус от внешнего сервиса.
+            attempt: номер попытки повторной обработки.
         """
         envelope = self._build_envelope(
             queue_name=queue_name,
@@ -43,6 +45,7 @@ class DLQPublisher:
             reason=reason,
             error=error,
             http_status_code=http_status_code,
+            attempt=attempt,
         )
 
         await self._channel.default_exchange.publish(
@@ -67,6 +70,7 @@ class DLQPublisher:
         reason: str,
         error: Optional[str],
         http_status_code: Optional[int],
+        attempt: int,
     ) -> dict:
         """Собрать словарь-обёртку для сообщения в DLQ."""
         dlq_info: dict = {
@@ -78,6 +82,7 @@ class DLQPublisher:
             dlq_info["error"] = error
         if http_status_code is not None:
             dlq_info["http_status_code"] = http_status_code
+        dlq_info["attempt"] = attempt
 
         try:
             original_message = json.loads(original_body.decode())

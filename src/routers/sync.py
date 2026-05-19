@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 
 from src.config.logging import get_logger
 from src.dependency_injection import get_orchestrator, get_service
-from src.models.enum import EntityType
+from src.models.enum import EntityType, SyncSource
 from src.schemas.base import SyncResponse
 from src.services.orchestrator import SyncOrchestrator
 from src.services.sync_services import BaseSyncService
@@ -31,6 +31,7 @@ async def create(
             object_id=None,
             payload=data,
             service_coro=lambda: service.create(data),
+            source=SyncSource.MANUAL,
         )
     except HTTPException:
         raise
@@ -42,6 +43,7 @@ async def create(
             object_id=None,
             payload=data,
             error_payload={'http_status_code': 500, 'success': False, 'message': str(exc)},
+            source=SyncSource.MANUAL,
         )
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -69,6 +71,7 @@ async def get(
             object_id=concrete_id,
             payload=None,
             service_coro=lambda: service.get(concrete_id),
+            source=SyncSource.MANUAL,
         )
     except Exception as exc:
         logger.error('get_error', entity=entity_type, id=concrete_id, error=str(exc))
@@ -78,6 +81,7 @@ async def get(
             object_id=concrete_id,
             payload=None,
             error_payload={'http_status_code': 500, 'success': False, 'message': str(exc)},
+            source=SyncSource.MANUAL,
         )
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -106,6 +110,7 @@ async def update(
             object_id=concrete_id,
             payload=data,
             service_coro=lambda: service.update(concrete_id, data),
+            source=SyncSource.MANUAL,
         )
     except HTTPException:
         raise
@@ -117,6 +122,7 @@ async def update(
             object_id=concrete_id,
             payload=data,
             error_payload={'http_status_code': 500, 'success': False, 'message': str(exc)},
+            source=SyncSource.MANUAL,
         )
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -144,6 +150,7 @@ async def delete(
             object_id=concrete_id,
             payload=None,
             service_coro=lambda: service.delete(concrete_id),
+            source=SyncSource.MANUAL,
         )
     except HTTPException:
         raise
@@ -155,6 +162,7 @@ async def delete(
             object_id=concrete_id,
             payload=None,
             error_payload={'http_status_code': 500, 'success': False, 'message': str(exc)},
+            source=SyncSource.MANUAL,
         )
         raise HTTPException(status_code=500, detail=str(exc))
 

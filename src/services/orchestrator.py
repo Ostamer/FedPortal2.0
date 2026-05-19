@@ -6,7 +6,7 @@
 from typing import Any, Awaitable, Callable, Dict, Optional
 
 from src.config.logging import get_logger
-from src.models.enum import EntityType
+from src.models.enum import EntityType, SyncSource
 from src.repositories.sync_record import SyncRecordRepository
 from src.schemas.base import SyncResponse
 
@@ -43,6 +43,7 @@ class SyncOrchestrator:
         object_id: Optional[int],
         payload: Optional[Dict[str, Any]],
         service_coro: Callable[[], Awaitable[SyncResponse]],
+        source: SyncSource = SyncSource.MANUAL,
     ) -> SyncResponse:
         """
         Выполнить синхронизацию с полным логированием и обновлением реестра.
@@ -69,7 +70,7 @@ class SyncOrchestrator:
         if payload is not None:
             request_data['payload'] = payload
 
-        log = await self._repo.create_log(request_data)
+        log = await self._repo.create_log(request_data, source)
 
         try:
             result = await service_coro()
@@ -108,6 +109,7 @@ class SyncOrchestrator:
         object_id: Optional[int],
         payload: Optional[Dict[str, Any]],
         error_payload: dict,
+        source: SyncSource = SyncSource.MANUAL,
     ) -> None:
         """
         Записать ошибку в лог и закоммитить (для REST endpoints).
@@ -128,6 +130,6 @@ class SyncOrchestrator:
         if payload is not None:
             request_data['payload'] = payload
 
-        log = await self._repo.create_log(request_data)
+        log = await self._repo.create_log(request_data, source)
         await self._repo.update_log(log, error_payload)
         await self._repo.commit()

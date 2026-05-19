@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from src.clients.fed_portal import ExternalApiClient
 from src.config.main import settings
 from src.consumers.consumer import MessageConsumer
+from src.consumers.consumer_dlq_retry import DLQRetryConsumer
 from src.config.logging import setup_logging, get_logger
 from src.routers.sync import sync_router
 from src.models.base import engine
@@ -36,9 +37,13 @@ async def startup(app: FastAPI):
     logger.info("external_api_client_created")
 
     consumer = MessageConsumer(app.state.client)
+    dlq_retry_consumer = DLQRetryConsumer(app.state.client)
+
     app.state.consumer = consumer
+    app.state.dlq_retry_consumer = dlq_retry_consumer
     app.state.consumer_task = asyncio.create_task(consumer_wrapper(consumer))
-    logger.info("consumer_started")
+    app.state.dlq_retry_consumer_task = asyncio.create_task(consumer_wrapper(dlq_retry_consumer))
+    logger.info("consumers_started")
 
 
 async def shutdown(app: FastAPI):
@@ -52,9 +57,21 @@ async def shutdown(app: FastAPI):
         except asyncio.CancelledError:
             logger.info("consumer_task_awaited")
 
+    dlq_retry_consumer_task = getattr(app.state, 'dlq_retry_consumer_task', None)
+    if dlq_retry_consumer_task and not dlq_retry_consumer_task.done():
+        dlq_retry_consumer_task.cancel()
+        try:
+            await dlq_retry_consumer_task
+        except asyncio.CancelledError:
+            logger.info("dlq_retry_consumer_task_awaited")
+
     consumer = getattr(app.state, 'consumer', None)
     if consumer:
         await consumer.stop()
+
+    dlq_retry_consumer = getattr(app.state, 'dlq_retry_consumer', None)
+    if dlq_retry_consumer:
+        await dlq_retry_consumer.stop()
 
     await engine.dispose()
     logger.info("database_disconnected")
