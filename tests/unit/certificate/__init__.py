@@ -1,0 +1,1 @@
+# Certificate entity tests
