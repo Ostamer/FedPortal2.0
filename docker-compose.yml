@@ -1,9 +1,8 @@
 version: '3.9'
-
 services:
   app:
     build: .
-    container_name: sync-service-app
+    container_name: fedportal-app
     ports:
       - "8000:8000"
     env_file:
@@ -11,10 +10,11 @@ services:
     depends_on:
       - postgres
       - rabbitmq
-
   postgres:
     image: postgres:16-alpine
-    container_name: sync-service-postgres
+    container_name: fedportal-postgres
+    security_opt:
+      - no-new-privileges:false
     environment:
       POSTGRES_DB: sync_db
       POSTGRES_USER: user
@@ -23,10 +23,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
-    container_name: sync-service-rabbitmq
+    container_name: fedportal-rabbitmq
+    security_opt:
+      - no-new-privileges:false
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
@@ -36,7 +37,8 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-
 volumes:
   postgres_data:
+    name: fedportal_postgres_data
   rabbitmq_data:
+    name: fedportal_rabbitmq_data

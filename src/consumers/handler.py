@@ -5,6 +5,7 @@
 
 import json
 from typing import Optional
+import traceback
 
 import aio_pika
 import httpx
@@ -82,6 +83,7 @@ class MessageHandler:
                     logger.warning(
                         'sync_fatal_exception',
                         error=str(exc),
+                        traceback=traceback.format_exc(),
                         entity=msg.entity_type,
                         action=msg.action,
                     )
@@ -178,7 +180,7 @@ class MessageHandler:
         retry_attempt: int,
     ) -> None:
         """Решить — ack или DLQ — на основе HTTP-статуса результата."""
-        status = result.http_status_code
+        status = int(result.http_status_code)
 
         if result.success:
             await message.ack()

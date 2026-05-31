@@ -24,7 +24,7 @@ class SyncedRecord(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     object_id: Mapped[int]
     entity_type: Mapped[EntityType] = mapped_column(
-        Enum(EntityType, name='entity_type', create_type=False),
+        Enum(EntityType, name='entity_type', create_type=False, values_callable=lambda x: [e.value for e in x]),
     )
     last_sync_time: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),

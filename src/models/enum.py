@@ -14,7 +14,7 @@ class EntityType(str, enum.Enum):
     PARENTS = 'parents'
 
 
-class SyncSource(str, enum.Enum):
+class SyncSource(enum.Enum):
     MAIN_QUEUE = 'main_queue'
     DLQ_RETRY = 'dlq_retry'
     MANUAL = 'manual'

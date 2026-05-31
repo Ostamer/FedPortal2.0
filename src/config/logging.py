@@ -1,10 +1,14 @@
+import logging
 import structlog
-
 from src.config.main import settings
 
 
 def setup_logging() -> None:
     """Настройка структурированного логирования."""
+    logging.basicConfig(
+        level=getattr(logging, settings.log_level.upper(), logging.INFO)
+    )
+
     json_renderer = structlog.processors.JSONRenderer()
     console_renderer = structlog.dev.ConsoleRenderer()
 

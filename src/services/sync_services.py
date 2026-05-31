@@ -115,6 +115,8 @@ class ClassicSyncService(BaseSyncService):
         if error_response:
             return error_response
 
+        logger.debug('sending_to_portal', entity=self.entity_type, payload=prepared)
+
         result = await self.client.send(
             endpoint=self.endpoint, method='POST', json_data=prepared
         )

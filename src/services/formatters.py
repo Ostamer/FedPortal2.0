@@ -137,7 +137,8 @@ class BaseFormatter:
             self._convert_float_fields(data)
 
         self._apply_mapping(data)
-        return data
+        logger.debug('formatter_result', formatter=self._get_log_name(), data=data)
+        return {'data': data}
 
     def _apply_mapping(self, data: Dict[str, Any]) -> None:
         """Применить маппинг к полям."""
