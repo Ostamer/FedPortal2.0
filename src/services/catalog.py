@@ -29,6 +29,8 @@ def _build_registry() -> Dict[str, EntityDefinition]:
         CertificateFormatter,
         DepartmentFormatter,
         EventFormatter,
+        KidsFormatter,
+        MunicipalityFormatter,
         OrderFormatter,
         OrganizationFormatter,
         ParentsFormatter,
@@ -39,6 +41,7 @@ def _build_registry() -> Dict[str, EntityDefinition]:
 
     entries = [
         _entry(EntityType.ORGANIZATION, 'organization', ClassicSyncService, OrganizationFormatter),
+        _entry(EntityType.MUNICIPALITY, 'municipality', ClassicSyncService, MunicipalityFormatter),
         _entry(EntityType.DEPARTMENT, 'department', ClassicSyncService, DepartmentFormatter),
         _entry(EntityType.ORDER, 'order', ClassicSyncService, OrderFormatter),
         _entry(EntityType.EVENT, 'event', EventSyncService, EventFormatter),
@@ -52,6 +55,7 @@ def _build_registry() -> Dict[str, EntityDefinition]:
             ProgramGroupFinancingSourceFormatter,
         ),
         _entry(EntityType.PARENTS, 'parents', ClassicSyncService, ParentsFormatter),
+        _entry(EntityType.KIDS, 'kids', ClassicSyncService, KidsFormatter),
     ]
     return dict(entries)
 

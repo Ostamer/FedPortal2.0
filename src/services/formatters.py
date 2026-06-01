@@ -43,11 +43,19 @@ from src.mappings.organization import (
 from src.mappings.program_group_financing_source import (
     PROGRAM_GROUP_FINANCING_SOURCE_MAP,
 )
+from src.mappings.kids import (
+    KIDS_SEX_MAP,
+    KIDS_PARAM1_STATE_MAP,
+    KIDS_PARAM2_STATE_MAP,
+    KIDS_PARAM6_MAP,
+)
 from src.schemas.payloads import (
     ActivityPayload,
     CertificatePayload,
     DepartmentPayload,
     EventPayload,
+    KidsPayload,
+    MunicipalityPayload,
     OrderPayload,
     OrganizationPayload,
     ParentsPayload,
@@ -197,11 +205,30 @@ class OrganizationFormatter(BaseFormatter):
     }
 
 
-class DepartmentFormatter(BaseFormatter):
+class MunicipalityFormatter(BaseFormatter):
     """Форматировщик для муниципалитетов (municipality)."""
 
-    PAYLOAD_MODEL = DepartmentPayload
+    PAYLOAD_MODEL = MunicipalityPayload
     MAP_FIELDS = {"location_type": DEPARTMENT_LOCATION_TYPE_MAP}
+
+
+class DepartmentFormatter(BaseFormatter):
+    """Форматировщик для department (id, name)."""
+
+    PAYLOAD_MODEL = DepartmentPayload
+    MAP_FIELDS = {}
+
+
+class KidsFormatter(BaseFormatter):
+    """Форматировщик для детей (kids)."""
+
+    PAYLOAD_MODEL = KidsPayload
+    MAP_FIELDS = {
+        "sex": KIDS_SEX_MAP,
+        "param1_state": KIDS_PARAM1_STATE_MAP,
+        "param2_state": KIDS_PARAM2_STATE_MAP,
+        "param6": KIDS_PARAM6_MAP,
+    }
 
 
 class OrderFormatter(BaseFormatter):

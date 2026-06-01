@@ -4,6 +4,7 @@ import enum
 
 class EntityType(str, enum.Enum):
     ORGANIZATION = 'organization'
+    MUNICIPALITY = 'municipality'
     DEPARTMENT = 'department'
     ORDER = 'order'
     EVENT = 'event'
@@ -12,6 +13,7 @@ class EntityType(str, enum.Enum):
     CERTIFICATE = 'certificate'
     PROGRAM_GROUP_FINANCING_SOURCE = 'program-group-financing-source'
     PARENTS = 'parents'
+    KIDS = 'kids'
 
 
 class SyncSource(enum.Enum):

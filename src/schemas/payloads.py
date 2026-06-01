@@ -42,6 +42,12 @@ from src.mappings.organization import (
 from src.mappings.program_group_financing_source import (
     PROGRAM_GROUP_FINANCING_SOURCE_MAP,
 )
+from src.mappings.kids import (
+    KIDS_SEX_MAP,
+    KIDS_PARAM1_STATE_MAP,
+    KIDS_PARAM2_STATE_MAP,
+    KIDS_PARAM6_MAP,
+)
 
 
 class OrganizationPayload(BaseModel):
@@ -124,8 +130,8 @@ class OrganizationPayload(BaseModel):
         return v
 
 
-class DepartmentPayload(BaseModel):
-    """Модель муниципалитета (department)."""
+class MunicipalityPayload(BaseModel):
+    """Модель муниципалитета (municipality) — ранее department."""
 
     model_config = ConfigDict(extra='allow')
 
@@ -144,6 +150,74 @@ class DepartmentPayload(BaseModel):
     def _validate_location_type(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and v not in DEPARTMENT_LOCATION_TYPE_MAP:
             raise ValueError(f'invalid location_type: {v}')
+        return v
+
+
+class DepartmentPayload(BaseModel):
+    """Модель department (id, name)."""
+
+    model_config = ConfigDict(extra='allow')
+
+    id: int
+    name: str
+
+
+class KidsPayload(BaseModel):
+    """Модель ребенка (kids)."""
+
+    model_config = ConfigDict(extra='allow')
+
+    guid: str
+    parent_guid: str
+    birthday: str
+    sex: str
+    id: int
+    param1: bool
+    param1_state: Optional[int] = None
+    param2: bool
+    param2_state: Optional[int] = None
+    param3: bool
+    param4: bool
+    param5: Optional[list[int]] = []
+    param6: Optional[int] = None
+
+    @field_validator('sex')
+    @classmethod
+    def _validate_sex(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v not in KIDS_SEX_MAP:
+            raise ValueError(f'invalid sex: {v}')
+        return v
+
+    @field_validator('param1_state')
+    @classmethod
+    def _validate_param1_state(cls, v: Optional[int]) -> Optional[int]:
+        if v is not None and v not in KIDS_PARAM1_STATE_MAP:
+            raise ValueError(f'invalid param1_state: {v}')
+        return v
+
+    @field_validator('param2_state')
+    @classmethod
+    def _validate_param2_state(cls, v: Optional[int]) -> Optional[int]:
+        if v is not None and v not in KIDS_PARAM2_STATE_MAP:
+            raise ValueError(f'invalid param2_state: {v}')
+        return v
+
+    @field_validator('param6')
+    @classmethod
+    def _validate_param6(cls, v: Optional[int]) -> Optional[int]:
+        if v is not None and v not in KIDS_PARAM6_MAP:
+            raise ValueError(f'invalid param6: {v}')
+        return v
+
+    @field_validator('param5')
+    @classmethod
+    def _validate_param5(cls, v: Optional[list]) -> Optional[list[int]]:
+        if v is not None:
+            if not isinstance(v, list):
+                raise ValueError('param5 must be a list')
+            for item in v:
+                if not isinstance(item, int):
+                    raise ValueError(f'param5 item must be int, got {type(item)}')
         return v
 
 

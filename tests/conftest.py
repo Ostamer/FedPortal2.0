@@ -116,17 +116,25 @@ def sample_organization_payload():
 
 
 @pytest.fixture
-def sample_department_payload():
+def sample_municipality_payload():
     return {
         "id": 1,
-        "guid": "dep-guid-1",
-        "name": "Test Department",
+        "guid": "mun-guid-1",
+        "name": "Test Municipality",
         "sort": 1,
         "okato": "12345678",
         "oktmo": "12345678",
         "kids_count": 100,
         "location_type": "Городская",
         "is_deleted": False,
+    }
+
+
+@pytest.fixture
+def sample_department_payload():
+    return {
+        "id": 1,
+        "name": "Test Department",
     }
 
 
@@ -252,4 +260,23 @@ def sample_parents_payload():
         "guid": "parent-guid-1",
         "param1": True,
         "is_large_family": False,
+    }
+
+
+@pytest.fixture
+def sample_kids_payload():
+    return {
+        "guid": "kids-guid-1",
+        "parent_guid": "parent-guid-1",
+        "birthday": "2015-06-15",
+        "sex": "Мужской",
+        "id": 1,
+        "param1": True,
+        "param1_state": 2,
+        "param2": False,
+        "param2_state": 1,
+        "param3": True,
+        "param4": False,
+        "param5": [1, 2, 3],
+        "param6": 2,
     }

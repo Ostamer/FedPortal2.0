@@ -13,16 +13,15 @@ class TestDepartmentFormatter:
         assert is_valid is True
         assert errors is None
 
-    def test_validate_invalid_location_type(self, sample_department_payload):
+    def test_validate_missing_required_field(self, sample_department_payload):
         formatter = DepartmentFormatter()
-        data = sample_department_payload.copy()
-        data["location_type"] = "Unknown"
+        data = {k: v for k, v in sample_department_payload.items() if k != "name"}
         is_valid, errors = formatter.validate(data)
         assert is_valid is False
         assert errors is not None
 
-    def test_format_applies_mapping(self, sample_department_payload):
+    def test_format_no_mapping(self, sample_department_payload):
         formatter = DepartmentFormatter()
-        data = sample_department_payload.copy()
-        result = formatter.format(data)
-        assert result["location_type"] == 1
+        result = formatter.format(sample_department_payload)
+        assert result["id"] == 1
+        assert result["name"] == "Test Department"

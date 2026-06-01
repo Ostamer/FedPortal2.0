@@ -71,10 +71,10 @@
       }
     }
   },
-  "department": {
+  "municipality": {
     "fastapi": {
       "id": 10,
-      "guid": "department-10-guid",
+      "guid": "municipality-10-guid",
       "name": "Центральный муниципалитет",
       "sort": 1,
       "okato": "45286585000",
@@ -84,11 +84,11 @@
       "is_deleted": false
     },
     "rabbitmq": {
-      "entity_type": "department",
+      "entity_type": "municipality",
       "action": "create",
       "payload": {
         "id": 10,
-        "guid": "department-10-guid",
+        "guid": "municipality-10-guid",
         "name": "Центральный муниципалитет",
         "sort": 1,
         "okato": "45286585000",
@@ -96,6 +96,20 @@
         "kids_count": 2500,
         "location_type": "Городская",
         "is_deleted": false
+      }
+    }
+  },
+  "department": {
+    "fastapi": {
+      "id": 1,
+      "name": "Отдел образования"
+    },
+    "rabbitmq": {
+      "entity_type": "department",
+      "action": "create",
+      "payload": {
+        "id": 1,
+        "name": "Отдел образования"
       }
     }
   },
@@ -338,6 +352,42 @@
         "guid": "parent-8001-guid",
         "param1": true,
         "is_large_family": false
+      }
+    }
+  },
+  "kids": {
+    "fastapi": {
+      "guid": "kids-9001-guid",
+      "parent_guid": "parent-8001-guid",
+      "birthday": "2015-06-15",
+      "sex": "Мужской",
+      "id": 9001,
+      "param1": true,
+      "param1_state": 2,
+      "param2": false,
+      "param2_state": 1,
+      "param3": true,
+      "param4": false,
+      "param5": [1, 2, 3],
+      "param6": 2
+    },
+    "rabbitmq": {
+      "entity_type": "kids",
+      "action": "create",
+      "payload": {
+        "guid": "kids-9001-guid",
+        "parent_guid": "parent-8001-guid",
+        "birthday": "2015-06-15",
+        "sex": "Мужской",
+        "id": 9001,
+        "param1": true,
+        "param1_state": 2,
+        "param2": false,
+        "param2_state": 2,
+        "param3": true,
+        "param4": false,
+        "param5": [1, 2, 3],
+        "param6": 2
       }
     }
   }
