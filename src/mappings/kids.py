@@ -36,3 +36,9 @@ KIDS_PARAM6_MAP = {
     "3 группа": 3,
     "Ребенок-инвалид": 4,
 }
+
+# Булевы поля (param1, param2, param3, param4)
+KIDS_BOOL_MAP = {
+    True: "Y",
+    False: "N",
+}

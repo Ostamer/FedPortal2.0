@@ -48,6 +48,7 @@ from src.mappings.kids import (
     KIDS_PARAM1_STATE_MAP,
     KIDS_PARAM2_STATE_MAP,
     KIDS_PARAM6_MAP,
+    KIDS_BOOL_MAP,
 )
 from src.schemas.payloads import (
     ActivityPayload,
@@ -220,11 +221,13 @@ class DepartmentFormatter(BaseFormatter):
 
 
 class KidsFormatter(BaseFormatter):
-    """Форматировщик для детей (kids)."""
-
     PAYLOAD_MODEL = KidsPayload
     MAP_FIELDS = {
         "sex": KIDS_SEX_MAP,
+        "param1": KIDS_BOOL_MAP,
+        "param2": KIDS_BOOL_MAP,
+        "param3": KIDS_BOOL_MAP,
+        "param4": KIDS_BOOL_MAP,
         "param1_state": KIDS_PARAM1_STATE_MAP,
         "param2_state": KIDS_PARAM2_STATE_MAP,
         "param6": KIDS_PARAM6_MAP,

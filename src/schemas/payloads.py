@@ -173,13 +173,13 @@ class KidsPayload(BaseModel):
     sex: str
     id: int
     param1: bool
-    param1_state: Optional[int] = None
+    param1_state: Optional[str] = None
     param2: bool
-    param2_state: Optional[int] = None
+    param2_state: Optional[str] = None
     param3: bool
     param4: bool
-    param5: Optional[list[int]] = []
-    param6: Optional[int] = None
+    param5: Optional[list[str]] = []
+    param6: Optional[str] = None
 
     @field_validator('sex')
     @classmethod
@@ -190,21 +190,21 @@ class KidsPayload(BaseModel):
 
     @field_validator('param1_state')
     @classmethod
-    def _validate_param1_state(cls, v: Optional[int]) -> Optional[int]:
+    def _validate_param1_state(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and v not in KIDS_PARAM1_STATE_MAP:
             raise ValueError(f'invalid param1_state: {v}')
         return v
 
     @field_validator('param2_state')
     @classmethod
-    def _validate_param2_state(cls, v: Optional[int]) -> Optional[int]:
+    def _validate_param2_state(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and v not in KIDS_PARAM2_STATE_MAP:
             raise ValueError(f'invalid param2_state: {v}')
         return v
 
     @field_validator('param6')
     @classmethod
-    def _validate_param6(cls, v: Optional[int]) -> Optional[int]:
+    def _validate_param6(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and v not in KIDS_PARAM6_MAP:
             raise ValueError(f'invalid param6: {v}')
         return v
@@ -451,7 +451,7 @@ class CertificatePayload(BaseModel):
     date_created: str
     denomination: int
     volume: int
-    external_id: int
+    id: int
     profile_id: int
 
     @field_validator('state')

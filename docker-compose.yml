@@ -2,17 +2,19 @@ version: '3.9'
 services:
   app:
     build: .
-    container_name: fedportal-app
+    container_name: fedportal1-app
     ports:
       - "8000:8000"
     env_file:
       - .env
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
   postgres:
     image: postgres:16-alpine
-    container_name: fedportal-postgres
+    container_name: fedportal1-postgres
     security_opt:
       - no-new-privileges:false
     environment:
@@ -23,9 +25,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d sync_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
-    container_name: fedportal-rabbitmq
+    container_name: fedportal1-rabbitmq
     security_opt:
       - no-new-privileges:false
     environment:
@@ -37,8 +44,13 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
 volumes:
   postgres_data:
-    name: fedportal_postgres_data
+    name: fedportal1_postgres_data
   rabbitmq_data:
-    name: fedportal_rabbitmq_data
+    name: fedportal1_rabbitmq_data
