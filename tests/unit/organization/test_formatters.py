@@ -33,6 +33,7 @@ class TestOrganizationFormatter:
         formatter = OrganizationFormatter()
         data = sample_organization_payload.copy()
         result = formatter.format(data)
+        result = result["data"]
         assert result["status"] == 0
         assert result["legal_form"] == 3
         assert result["subordination_id"] == 2

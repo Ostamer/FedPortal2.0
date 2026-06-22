@@ -87,6 +87,55 @@ class TestExternalApiClientSend:
         assert result["data"] == {"raw_response": "upstream failed"}
 
     @pytest.mark.asyncio
+    async def test_200_with_error_in_body(self, client, mock_send):
+        # Портал отдаёт HTTP 200, но в теле ошибка (err_code != 0).
+        mock_send.return_value = build_response(
+            200,
+            content=b'{"err_code": 400, "message": "bad request"}',
+            headers={"content-type": "application/json"},
+        )
+        result = await client.send(endpoint="organization", method="POST")
+        assert result["success"] is False
+        assert result["err_code"] == 400
+        assert result["message"] == "bad request"
+        # HTTP-подобный код из тела используется для маршрутизации.
+        assert result["http_status_code"] == 400
+
+    @pytest.mark.asyncio
+    async def test_200_with_success_false_in_body(self, client, mock_send):
+        mock_send.return_value = build_response(
+            200,
+            content=b'{"success": false, "errors": ["x"]}',
+            headers={"content-type": "application/json"},
+        )
+        result = await client.send(endpoint="organization", method="POST")
+        assert result["success"] is False
+        assert result["errors"] == ["x"]
+
+    @pytest.mark.asyncio
+    async def test_200_err_code_zero_is_success(self, client, mock_send):
+        mock_send.return_value = build_response(
+            200,
+            content=b'{"err_code": 0, "data": {"id": 1}}',
+            headers={"content-type": "application/json"},
+        )
+        result = await client.send(endpoint="organization", method="GET", concrete_id=1)
+        assert result["success"] is True
+
+    @pytest.mark.asyncio
+    async def test_200_non_json_body_is_error(self, client, mock_send):
+        # Квирк портала: HTTP 200 + HTML-страница «Error 404».
+        mock_send.return_value = build_response(
+            200,
+            content=b"<html>Error 404</html>",
+            headers={"content-type": "text/html"},
+        )
+        result = await client.send(endpoint="organization", method="GET", concrete_id=1)
+        assert result["success"] is False
+        assert result["err_code"] == "non_json_error_response"
+        assert result["data"] == {"raw_response": "<html>Error 404</html>"}
+
+    @pytest.mark.asyncio
     async def test_timeout_exception(self, client, mock_send):
         mock_send.side_effect = httpx.TimeoutException(
             "timeout", request=httpx.Request("GET", "https://example.com")

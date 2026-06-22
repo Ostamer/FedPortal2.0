@@ -33,6 +33,7 @@ class TestActivityFormatter:
         formatter = ActivityFormatter()
         data = sample_activity_payload.copy()
         result = formatter.format(data)
+        result = result["data"]
         assert result["state"] == 3
         assert result["education_form"] == "FULL_TIME"
         assert result["level"] == "MUN"

@@ -30,6 +30,32 @@ class ExternalApiClient:
         """Закрыть HTTP клиент."""
         await self._client.aclose()
 
+    @staticmethod
+    def _apply_body_error(result: Dict[str, Any], body: Any) -> None:
+        """Отметить ответ как ошибочный, если тело содержит признак ошибки.
+
+        Портал отдаёт `{err_code, errors, message, ...}`; успех — это err_code 0
+        и отсутствие success=false. HTTP-статус при этом может быть 200.
+        """
+        if not isinstance(body, dict):
+            return
+
+        err_code = body.get('err_code')
+        body_success = body.get('success')
+        has_error = (body_success is False) or (err_code not in (None, 0, '0'))
+        if not has_error:
+            return
+
+        result['success'] = False
+        result['err_code'] = err_code if err_code is not None else 'portal_error'
+        result['message'] = body.get('message') or body.get('errors')
+        if body.get('errors') is not None:
+            result['errors'] = body['errors']
+        # Если портал прислал HTTP-подобный код ошибки в теле при статусе 200 —
+        # используем его, чтобы handler корректно маршрутизировал (fatal/retry).
+        if isinstance(err_code, int) and 400 <= err_code <= 599:
+            result['http_status_code'] = err_code
+
     def _build_url(self, endpoint: str, concrete_id: Optional[int | str] = None) -> str:
         """Собрать полный URL для запроса."""
         path = endpoint.strip('/')
@@ -98,18 +124,22 @@ class ExternalApiClient:
                 try:
                     response_json = response.json()
                     result['data'] = response_json
+                    # Федеральный портал может вернуть HTTP 200, но с ошибкой
+                    # в теле ответа (err_code != 0 / success=false). Проверяем
+                    # тело, а не только статус-код (как в старом client.py).
+                    self._apply_body_error(result, response_json)
                 except ValueError:
                     result['success'] = False
                     result['err_code'] = 'invalid_json_response'
                     result['message'] = 'Response is not valid JSON'
                     result['data'] = {'raw_response': response.text}
             else:
+                # Контракт портала — JSON. Не-JSON тело (например HTML-страница
+                # «Error 404» при статусе 200) считаем ошибкой независимо от кода.
                 result['data'] = {'raw_response': response.text}
-
-                if not response.is_success:
-                    result['message'] = response.text
-                    result['err_code'] = 'non_json_error_response'
-
+                result['success'] = False
+                result['message'] = response.text
+                result['err_code'] = 'non_json_error_response'
 
         logger.info(
             'external_api_request',

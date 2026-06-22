@@ -25,7 +25,8 @@ class TestCertificateFormatter:
         formatter = CertificateFormatter()
         data = sample_certificate_payload.copy()
         result = formatter.format(data)
-        assert result["state"] == "initial"
+        result = result["data"]
+        assert result["state"] == "actual"
 
     def test_validate_state_none(self, sample_certificate_payload):
         formatter = CertificateFormatter()

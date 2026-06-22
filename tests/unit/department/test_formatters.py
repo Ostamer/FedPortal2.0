@@ -23,5 +23,6 @@ class TestDepartmentFormatter:
     def test_format_no_mapping(self, sample_department_payload):
         formatter = DepartmentFormatter()
         result = formatter.format(sample_department_payload)
+        result = result["data"]
         assert result["id"] == 1
         assert result["name"] == "Test Department"

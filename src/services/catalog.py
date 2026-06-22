@@ -26,6 +26,7 @@ def _entry(
 def _build_registry() -> Dict[str, EntityDefinition]:
     from src.services.formatters import (
         ActivityFormatter,
+        ActivityOrderFormatter,
         CertificateFormatter,
         DepartmentFormatter,
         EventFormatter,
@@ -56,6 +57,12 @@ def _build_registry() -> Dict[str, EntityDefinition]:
         ),
         _entry(EntityType.PARENTS, 'parents', ClassicSyncService, ParentsFormatter),
         _entry(EntityType.KIDS, 'kids', ClassicSyncService, KidsFormatter),
+        _entry(
+            EntityType.ACTIVITY_ORDER,
+            'activity-order',
+            ClassicSyncService,
+            ActivityOrderFormatter,
+        ),
     ]
     return dict(entries)
 

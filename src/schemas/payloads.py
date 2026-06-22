@@ -19,6 +19,7 @@ from src.mappings.activity import (
     ACTIVITY_SIGNIFICANT_PROJECT_MAP,
     ACTIVITY_STATE_MAP,
 )
+from src.mappings.activity_order import ACTIVITY_ORDER_STATE_MAP
 from src.mappings.certificate import CERTIFICATE_STATE_MAP
 from src.mappings.department import DEPARTMENT_LOCATION_TYPE_MAP
 from src.mappings.event import (
@@ -66,11 +67,11 @@ class OrganizationPayload(BaseModel):
     email: Optional[str]
     responsible: Optional[str]
     OGRN: str
-    legal_form: str
+    legal_form: Optional[str]
     legal_address: Optional[str]
     actual_address: Optional[str]
     department_id: int
-    subordination_id: str
+    subordination_id: Optional[str]
     date_created: str
     is_license: bool
     license: Optional[str]
@@ -78,7 +79,7 @@ class OrganizationPayload(BaseModel):
     accreditation_license: Optional[str]
     accreditation_serial: Optional[str]
     accreditation_date: Optional[str]
-    accreditation_category: str
+    accreditation_category: Optional[str]
     type: str
     accounting_type: str
     financing_normativ: bool
@@ -131,7 +132,7 @@ class OrganizationPayload(BaseModel):
 
 
 class MunicipalityPayload(BaseModel):
-    """Модель муниципалитета (municipality) — ранее department."""
+    """Модель муниципалитета (municipality)"""
 
     model_config = ConfigDict(extra='allow')
 
@@ -168,7 +169,7 @@ class KidsPayload(BaseModel):
     model_config = ConfigDict(extra='allow')
 
     guid: str
-    parent_guid: str
+    parent_guid: Optional[str] = None
     birthday: str
     sex: str
     id: int
@@ -281,7 +282,7 @@ class ActivityPayload(BaseModel):
     level: str
     date_created: str
     section: str
-    significant_project: str
+    significant_project: Optional[str] = None
 
     @field_validator('persons')
     @classmethod
@@ -345,7 +346,7 @@ class EventPayload(BaseModel):
     guid: str
     partner_id: int
     partner_guid: str
-    municipality_id: int
+    municipality_id: Optional[int] = None
     name: str
     state: str
     age_from: float
@@ -353,20 +354,20 @@ class EventPayload(BaseModel):
     rate: float
     location: Optional[str]
     program_type: str
-    section_id: str
+    section_id: Optional[str] = None
     announce: Optional[str]
     description: Optional[str]
-    date_created: str
+    date_created: Optional[str] = None
     duration: float
     duration_unit: str
     min_persons: int
     max_persons: int
-    levels: str
-    education_form: str
+    levels: Optional[str] = None
+    education_form: Optional[str] = None
     certificate_required: bool
     param1: bool
     param2: bool
-    adaptive_type: str
+    adaptive_type: Optional[str] = None
 
     @field_validator('state')
     @classmethod
@@ -425,17 +426,17 @@ class ProgramGroupPayload(BaseModel):
 
     id: int
     guid: str
-    program_guid: str
+    program_guid: Optional[str] = None
     name: str
     age_to: float
     age_from: float
     size_min: int
     size: int
-    date_begin: str
-    date_end: str
+    date_begin: Optional[str] = None
+    date_end: Optional[str] = None
     hours_year: int
     cost_hour_manual: float
-    municipality_guid: str
+    municipality_guid: Optional[str] = None
 
 
 class CertificatePayload(BaseModel):
@@ -445,14 +446,15 @@ class CertificatePayload(BaseModel):
 
     guid: str
     state: Optional[str]
-    municipality_guid: str
-    child_guid: str
+    municipality_guid: Optional[str] = None
+    child_guid: Optional[str] = None
     payment_cert: bool
     date_created: str
-    denomination: int
-    volume: int
     external_id: int
-    profile_id: int
+    # Старый интеграционный сервис эти поля не отправлял — на портале опциональны.
+    denomination: Optional[int] = None
+    volume: Optional[int] = None
+    profile_id: Optional[int] = None
 
     @field_validator('state')
     @classmethod
@@ -469,7 +471,8 @@ class ProgramGroupFinancingSourcePayload(BaseModel):
 
     id: int
     group_guid: str
-    financing_source: str
+    # По ТЗ — одиночный код источника финансирования (Справочник 15).
+    financing_source: Optional[str] = None
     financing_cost: float
 
     @field_validator('financing_source')
@@ -489,3 +492,24 @@ class ParentsPayload(BaseModel):
     guid: str
     param1: bool
     is_large_family: bool
+
+
+class ActivityOrderPayload(BaseModel):
+    """Модель заявки на мероприятие (activity-order)."""
+
+    model_config = ConfigDict(extra='allow')
+
+    id: int
+    state: str
+    child_guid: str
+    user_guid: Optional[str] = None
+    partner_guid: str
+    activity_guid: str
+    date_created: Optional[str] = None
+
+    @field_validator('state')
+    @classmethod
+    def _validate_state(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v not in ACTIVITY_ORDER_STATE_MAP:
+            raise ValueError(f'invalid state: {v}')
+        return v

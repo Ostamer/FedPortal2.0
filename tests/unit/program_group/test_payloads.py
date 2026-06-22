@@ -15,11 +15,17 @@ class TestProgramGroupPayload:
         assert pg.age_from == 6.0
         assert pg.age_to == 12.0
 
-    def test_missing_required_field_program_guid(self, sample_program_group_payload):
-        data = {k: v for k, v in sample_program_group_payload.items() if k != "program_guid"}
+    def test_missing_required_field_id(self, sample_program_group_payload):
+        data = {k: v for k, v in sample_program_group_payload.items() if k != "id"}
         with pytest.raises(ValidationError) as exc_info:
             ProgramGroupPayload.model_validate(data)
-        assert "program_guid" in str(exc_info.value)
+        assert "id" in str(exc_info.value)
+
+    def test_program_guid_optional(self, sample_program_group_payload):
+        # program_guid опционален: образовательная программа может быть не привязана.
+        data = {k: v for k, v in sample_program_group_payload.items() if k != "program_guid"}
+        pg = ProgramGroupPayload.model_validate(data)
+        assert pg.program_guid is None
 
     def test_float_age_fields(self, sample_program_group_payload):
         data = sample_program_group_payload.copy()

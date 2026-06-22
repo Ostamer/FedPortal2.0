@@ -20,6 +20,7 @@ from src.mappings.activity import (
     ACTIVITY_SIGNIFICANT_PROJECT_MAP,
     ACTIVITY_STATE_MAP,
 )
+from src.mappings.activity_order import ACTIVITY_ORDER_STATE_MAP
 from src.mappings.certificate import CERTIFICATE_STATE_MAP
 from src.mappings.department import DEPARTMENT_LOCATION_TYPE_MAP
 from src.mappings.event import (
@@ -50,6 +51,7 @@ from src.mappings.kids import (
     KIDS_PARAM6_MAP,
 )
 from src.schemas.payloads import (
+    ActivityOrderPayload,
     ActivityPayload,
     CertificatePayload,
     DepartmentPayload,
@@ -64,6 +66,11 @@ from src.schemas.payloads import (
 )
 
 logger = get_logger(__name__)
+
+# Булевы поля, которые портал ожидает в виде строк "Y"/"N" (по ТЗ ЕАИС ДО:
+# kids.param1..param4, parents.param1/is_large_family). Маппинг применяется на
+# выходе формата; на входе поля валидируются как bool.
+YES_NO_MAP = {True: 'Y', False: 'N'}
 
 
 class BaseFormatter:
@@ -225,6 +232,10 @@ class KidsFormatter(BaseFormatter):
     PAYLOAD_MODEL = KidsPayload
     MAP_FIELDS = {
         "sex": KIDS_SEX_MAP,
+        "param1": YES_NO_MAP,
+        "param2": YES_NO_MAP,
+        "param3": YES_NO_MAP,
+        "param4": YES_NO_MAP,
         "param1_state": KIDS_PARAM1_STATE_MAP,
         "param2_state": KIDS_PARAM2_STATE_MAP,
         "param6": KIDS_PARAM6_MAP,
@@ -251,6 +262,13 @@ class ActivityFormatter(BaseFormatter):
         "length_unit": ACTIVITY_LENGTH_UNIT_MAP,
         "significant_project": ACTIVITY_SIGNIFICANT_PROJECT_MAP,
     }
+
+
+class ActivityOrderFormatter(BaseFormatter):
+    """Форматировщик для заявок на мероприятие (activity-order)."""
+
+    PAYLOAD_MODEL = ActivityOrderPayload
+    MAP_FIELDS = {"state": ACTIVITY_ORDER_STATE_MAP}
 
 
 class EventFormatter(BaseFormatter):
@@ -293,4 +311,7 @@ class ParentsFormatter(BaseFormatter):
     """Форматировщик для родителей (parents)."""
 
     PAYLOAD_MODEL = ParentsPayload
-    MAP_FIELDS = {}
+    MAP_FIELDS = {
+        "param1": YES_NO_MAP,
+        "is_large_family": YES_NO_MAP,
+    }

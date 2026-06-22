@@ -25,6 +25,7 @@ class TestOrderFormatter:
         formatter = OrderFormatter()
         data = sample_order_payload.copy()
         result = formatter.format(data)
+        result = result["data"]
         assert result["state"] == "initial"
 
     def test_validate_invalid_birthday(self, sample_order_payload):

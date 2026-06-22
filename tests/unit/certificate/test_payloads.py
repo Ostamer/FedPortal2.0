@@ -11,14 +11,20 @@ class TestCertificatePayload:
     def test_valid_certificate(self, sample_certificate_payload):
         cert = CertificatePayload.model_validate(sample_certificate_payload)
         assert cert.guid == "cert-guid-1"
-        assert cert.state == "Новая"
+        assert cert.state == "Активен"
         assert cert.payment_cert is True
 
-    def test_missing_required_field_child_guid(self, sample_certificate_payload):
-        data = {k: v for k, v in sample_certificate_payload.items() if k != "child_guid"}
+    def test_missing_required_field_guid(self, sample_certificate_payload):
+        data = {k: v for k, v in sample_certificate_payload.items() if k != "guid"}
         with pytest.raises(ValidationError) as exc_info:
             CertificatePayload.model_validate(data)
-        assert "child_guid" in str(exc_info.value)
+        assert "guid" in str(exc_info.value)
+
+    def test_child_guid_optional(self, sample_certificate_payload):
+        # child_guid опционален: ребёнок может быть без портфолио обучающегося.
+        data = {k: v for k, v in sample_certificate_payload.items() if k != "child_guid"}
+        cert = CertificatePayload.model_validate(data)
+        assert cert.child_guid is None
 
     def test_invalid_state_value(self, sample_certificate_payload):
         data = sample_certificate_payload.copy()

@@ -231,15 +231,12 @@ def sample_program_group_payload():
 def sample_certificate_payload():
     return {
         "guid": "cert-guid-1",
-        "state": "Новая",
+        "state": "Активен",
         "municipality_guid": "mun-guid",
         "child_guid": "child-guid",
         "payment_cert": True,
         "date_created": "2023-01-01",
-        "denomination": 1000,
-        "volume": 10,
         "external_id": 1,
-        "profile_id": 2,
     }
 
 
@@ -260,6 +257,19 @@ def sample_parents_payload():
         "guid": "parent-guid-1",
         "param1": True,
         "is_large_family": False,
+    }
+
+
+@pytest.fixture
+def sample_activity_order_payload():
+    return {
+        "id": 1,
+        "state": "Новая",
+        "child_guid": "child-guid-1",
+        "user_guid": "parent-guid-1",
+        "partner_guid": "partner-guid",
+        "activity_guid": "activity-guid-1",
+        "date_created": "2023-01-01 10:00:00",
     }
 
 

@@ -14,6 +14,7 @@ class EntityType(str, enum.Enum):
     PROGRAM_GROUP_FINANCING_SOURCE = 'program-group-financing-source'
     PARENTS = 'parents'
     KIDS = 'kids'
+    ACTIVITY_ORDER = 'activity-order'
 
 
 class SyncSource(enum.Enum):

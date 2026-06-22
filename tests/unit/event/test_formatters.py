@@ -33,6 +33,7 @@ class TestEventFormatter:
         formatter = EventFormatter()
         data = sample_event_payload.copy()
         result = formatter.format(data)
+        result = result["data"]
         assert result["state"] == 3
         assert result["program_type"] == 1
         assert result["section_id"] == 173

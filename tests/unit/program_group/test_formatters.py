@@ -17,5 +17,6 @@ class TestProgramGroupFormatter:
         formatter = ProgramGroupFormatter()
         data = sample_program_group_payload.copy()
         result = formatter.format(data)
+        result = result["data"]
         assert result["name"] == "Test Group"
         assert "age_from" in result

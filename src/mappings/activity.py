@@ -13,6 +13,7 @@ ACTIVITY_PERSONS_MAP = {
     "Дети": "CHILD",
     "Администраторы": "ADMIN",
     "Педагоги": "TEACHER",
+    "Родители": "PARENT",
 }
 
 # Мера продолжительности мероприятия (length_unit)

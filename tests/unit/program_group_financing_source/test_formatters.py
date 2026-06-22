@@ -25,4 +25,5 @@ class TestProgramGroupFinancingSourceFormatter:
         formatter = ProgramGroupFinancingSourceFormatter()
         data = sample_program_group_financing_source_payload.copy()
         result = formatter.format(data)
+        result = result["data"]
         assert result["financing_source"] == 1

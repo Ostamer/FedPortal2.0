@@ -13,9 +13,12 @@ class TestParentsFormatter:
         assert is_valid is True
         assert errors is None
 
-    def test_format_no_mapping(self, sample_parents_payload):
+    def test_format_yes_no_mapping(self, sample_parents_payload):
+        # По ТЗ param1/is_large_family уходят строками "Y"/"N".
         formatter = ParentsFormatter()
-        data = sample_parents_payload.copy()
+        data = sample_parents_payload.copy()  # param1=True, is_large_family=False
         result = formatter.format(data)
+        result = result["data"]
         assert result["guid"] == "parent-guid-1"
-        assert result["param1"] is True
+        assert result["param1"] == "Y"
+        assert result["is_large_family"] == "N"

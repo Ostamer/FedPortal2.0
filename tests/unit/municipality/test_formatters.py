@@ -31,4 +31,5 @@ class TestMunicipalityFormatter:
     def test_format_applies_mapping(self, sample_municipality_payload):
         formatter = MunicipalityFormatter()
         result = formatter.format(sample_municipality_payload)
-        assert result["location_type"] == "Городская"
+        result = result["data"]
+        assert result["location_type"] == 1
