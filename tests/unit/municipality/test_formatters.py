@@ -33,3 +33,4 @@ class TestMunicipalityFormatter:
         result = formatter.format(sample_municipality_payload)
         result = result["data"]
         assert result["location_type"] == 1
+        assert result["is_deleted"] == "N"

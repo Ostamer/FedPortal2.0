@@ -18,7 +18,7 @@ class SyncResponse(BaseModel):
     success: bool = True
     message: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
-    errors: Optional[Dict[str, Any]] = None
+    errors: Optional[Any] = None
     err_code: Optional[int | str] = None
 
 

@@ -216,7 +216,11 @@ class MunicipalityFormatter(BaseFormatter):
     """Форматировщик для муниципалитетов (municipality)."""
 
     PAYLOAD_MODEL = MunicipalityPayload
-    MAP_FIELDS = {"location_type": DEPARTMENT_LOCATION_TYPE_MAP}
+    MAP_FIELDS = {
+        "location_type": DEPARTMENT_LOCATION_TYPE_MAP,
+        # Колонка портала enum('Y','N') — bool false ломает INSERT (500).
+        "is_deleted": YES_NO_MAP,
+    }
 
 
 class DepartmentFormatter(BaseFormatter):
