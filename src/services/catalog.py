@@ -38,15 +38,15 @@ def _build_registry() -> Dict[str, EntityDefinition]:
         ProgramGroupFinancingSourceFormatter,
         ProgramGroupFormatter,
     )
-    from src.services.sync_services import ActivitySyncService, ClassicSyncService, EventSyncService
+    from src.services.sync_services import ClassicSyncService
 
     entries = [
         _entry(EntityType.ORGANIZATION, 'organization', ClassicSyncService, OrganizationFormatter),
         _entry(EntityType.MUNICIPALITY, 'municipality', ClassicSyncService, MunicipalityFormatter),
         _entry(EntityType.DEPARTMENT, 'department', ClassicSyncService, DepartmentFormatter),
         _entry(EntityType.ORDER, 'order', ClassicSyncService, OrderFormatter),
-        _entry(EntityType.EVENT, 'event', EventSyncService, EventFormatter),
-        _entry(EntityType.ACTIVITY, 'activity', ActivitySyncService, ActivityFormatter),
+        _entry(EntityType.EVENT, 'event', ClassicSyncService, EventFormatter),
+        _entry(EntityType.ACTIVITY, 'activity', ClassicSyncService, ActivityFormatter),
         _entry(EntityType.PROGRAM_GROUP, 'program-group', ClassicSyncService, ProgramGroupFormatter),
         _entry(EntityType.CERTIFICATE, 'certificate', ClassicSyncService, CertificateFormatter),
         _entry(
